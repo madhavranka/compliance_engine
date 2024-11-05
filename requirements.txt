@@ -1,0 +1,5 @@
+Django>=3.2,<4.0  # Specify the version of Django you want to use
+djangorestframework>=3.12,<4.0  # For building RESTful APIs
+djangorestframework-simplejwt>=4.0,<5.0  # For JWT authentication
+# psycopg2-binary>=2.9,<3.0  # PostgreSQL database adapter (if using PostgreSQL)
+# Add any other packages you may require, e.g., for testing or additional functionality
