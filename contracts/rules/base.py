@@ -1,9 +1,7 @@
-# contracts/rules/base.py
-
 from typing import Any, Dict
 import re
 
-class Rule:
+class RuleEvaluator:
     def __init__(self, field_name: str, operator: str, value: Any):
         self.field_name = field_name
         self.operator = operator
@@ -41,14 +39,29 @@ class RuleSet:
         self.logic = logic
 
     def evaluate(self, context: Dict[str, Any]) -> bool:
+        evaluation = []
+        for rule in self.rules:
+            if isinstance(rule, RuleEvaluator):
+                evaluation.append(rule.evaluate(context))
+            elif isinstance(rule, RuleSet):
+                evaluation.append(rule.evaluate(context))
+            else:
+                evaluator = RuleEvaluator(rule.field_name, rule.operator, rule.value)
+                evaluation.append(evaluator.evaluate(context))
         if self.logic == 'AND':
-            return all(rule.evaluate(context) for rule in self.rules)
+            for result in evaluation:
+                if not result:
+                    return False
+            return True
         elif self.logic == 'OR':
-            return any(rule.evaluate(context) for rule in self.rules)
+            # Using a for loop instead of any()
+            for result in evaluation:
+                if result:
+                    return True
+            return False
         else:
             raise ValueError(f"Unsupported logic: {self.logic}")
-
-class RuleWithPlaceholder(Rule):
+class RuleWithPlaceholder(RuleEvaluator):
     def __init__(self, field_name: str, operator: str, value: str):
         super().__init__(field_name, operator, value)
         self.placeholders = self.extract_placeholders(value)
