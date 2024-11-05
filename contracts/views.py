@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from .models import Company, Contract, User, Rule
-from .serializers import CompanySerializer, ContractSerializer, RuleSerializer, RuleValidationSerializer, UserSerializer
+from .models import Company, Contract, User, Rule, RuleSet
+from .serializers import CompanySerializer, ContractSerializer, RuleSerializer, RuleSetSerializer, RuleValidationSerializer, UserSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -17,12 +17,26 @@ class ContractViewSet(viewsets.ModelViewSet):
     serializer_class = ContractSerializer
 
     def create(self, request, *args, **kwargs):
+
+        # If a custom rule set is passed, that could be used
+        rule_set_id = request.data.get('rule_set_id')
+        ruleStructure = None
+        if rule_set_id is not None:
+            # validate the rule to belong to the company
+            ruleStructure = request.data['rule_structure'] = RuleSet.objects.get(id=rule_set_id).get_rules()
         serializer = RuleValidationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
             company = serializer.validated_data['company']
             rule_set = serializer.validated_data['rules']
 
+            # Create a new rule set for the company
+            if ruleStructure is None:
+                newRuleSet = RuleSet(
+                    company=company,
+                )
+                newRuleSet.set_rules(request.data['rule_structure'])
+                newRuleSet.save()
             context = {
                 'age': user.age,
                 'country': user.country,
@@ -55,3 +69,7 @@ class ContractViewSet(viewsets.ModelViewSet):
 class RuleViewSet(viewsets.ModelViewSet):
     queryset = Rule.objects.all()
     serializer_class = RuleSerializer
+
+class RuleSetViewSet(viewsets.ModelViewSet):
+    queryset = RuleSet.objects.all()
+    serializer_class = RuleSetSerializer

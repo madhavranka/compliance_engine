@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Company, Contract, Rule
+from .models import RuleSet, User, Company, Contract, Rule
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -16,3 +16,8 @@ class ContractAdmin(admin.ModelAdmin):
 @admin.register(Rule)
 class RuleAdmin(admin.ModelAdmin):
     list_display = ('id', 'field_name', 'operator', 'value')
+
+@admin.register(RuleSet)
+class RuleSetAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'company', 'rules')
+

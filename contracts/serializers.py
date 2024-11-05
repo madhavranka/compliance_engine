@@ -23,7 +23,10 @@ class RuleSerializer(serializers.ModelSerializer):
         model = Rule
         fields = '__all__'
 
-
+class RuleSetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RuleSet
+        fields = '__all__'
 
 class RuleValidationSerializer(serializers.Serializer):
     user = serializers.IntegerField()

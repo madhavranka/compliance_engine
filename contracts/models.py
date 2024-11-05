@@ -1,4 +1,5 @@
 from django.db import models
+import json
 
 class User(models.Model):
     name = models.CharField(max_length=100)
@@ -28,6 +29,19 @@ class Rule(models.Model):
     field_name = models.CharField(max_length=100)
     operator = models.CharField(max_length=10)  # e.g., '==', '!=', '>', '<'
     value = models.CharField(max_length=100)  # This can contain placeholders
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='rules')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+class RuleSet(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='rule_set')
+    name = models.CharField(max_length=100)
+    rules = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    def set_rules(self, data):
+        self.rules = json.dumps(data)
+    def get_rules(self):
+        return json.loads(self.rules)
+
 
